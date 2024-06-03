@@ -3,6 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const { log } = require("console");
 
 const generateToken = (userCredentials) => {
   const payload = {
@@ -41,7 +42,6 @@ const getSingleUsers = async (req, res, next) => {
 const loginUser = async (req, res, next) => {
   try {
     const token = generateToken(req.user);
-
     res.status(201).json({ token });
   } catch (error) {
     next(error);
