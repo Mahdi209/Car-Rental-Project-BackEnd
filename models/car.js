@@ -2,6 +2,11 @@ const { default: mongoose } = require("mongoose");
 const { model, Schema } = mongoose;
 
 const CarSchema = new Schema({
+  carCompany: {
+    type: Schema.Types.ObjectId,
+    ref: "CarCompany",
+    required: true,
+  },
   carName: {
     type: String,
   },

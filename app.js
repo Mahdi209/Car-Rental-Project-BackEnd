@@ -8,8 +8,14 @@ const connectDB = require("./database");
 const cors = require("cors");
 const notFound = require("./middlewares/notFoundPage");
 const errorHandle = require("./middlewares/handleError");
-const userRouter = require("./user/user.router");
-const role = require("./role/role.router");
+const userRouter = require("./API/user/user.router");
+const role = require("./API/role/role.router");
+const reviewsRouter = require("./API/reviews/reviews.router");
+const carCompanyRouter = require("./API/carCompany/carCompany.router");
+const carTypeRouter = require("./API/carType/carType.router");
+const carRouter = require("./API/car/car.router");
+const locationRouter = require("./API/location/location.router");
+const carDetailsRouter = require("./API/carDetails/carDetails.router");
 connectDB();
 app.use(cors());
 
@@ -19,6 +25,12 @@ const staticPath = path.join(path.dirname(""), "static/images");
 app.use("/images", express.static(staticPath));
 app.use("/users", userRouter);
 app.use("/role", role);
+app.use("/reviews", reviewsRouter);
+app.use("/carCompany", carCompanyRouter);
+app.use("/carType", carTypeRouter);
+app.use("/car", carRouter);
+app.use("/location", locationRouter);
+app.use("/carDetails", carDetailsRouter);
 
 // Page not found
 app.use(notFound);

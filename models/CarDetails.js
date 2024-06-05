@@ -4,24 +4,37 @@ const { model, Schema } = mongoose;
 const CarDetailsSchema = new Schema({
   car: {
     type: Schema.Types.ObjectId,
+    ref: "Car",
     required: true,
   },
-  Color: {
-    type: String,
+  company: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
   },
-  Year: {
-    type: Number,
+  color: {
+    type: String,
+    required: true,
   },
 
+  year: {
+    type: Number,
+    required: true,
+  },
   status: {
     type: Boolean,
     required: true,
   },
-  quantity: {
+  pricePerDay: {
     type: Number,
+    required: true,
   },
+  pricePerWeek: {
+    type: Number,
+    required: true,
+  },
+  image: String,
 });
-
 const CarDetails = model("CarDetails", CarDetailsSchema);
 
 module.exports = CarDetails;

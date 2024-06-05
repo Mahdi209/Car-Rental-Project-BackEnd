@@ -29,6 +29,11 @@ const userSchema = new Schema({
     },
   },
   profile: String,
+  role: {
+    type: Schema.Types.ObjectId,
+    ref: "Role",
+    required: true,
+  },
 });
 
 const User = model("User", userSchema);

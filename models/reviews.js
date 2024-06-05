@@ -22,7 +22,6 @@ const ReviewSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "User",
   },
-
   created_at: {
     type: Date,
     default: Date.now(),

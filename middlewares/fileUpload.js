@@ -12,13 +12,17 @@ const storage = multer.diskStorage({
   },
 });
 const fileFilterFn = (req, file, cb) => {
-  let filetypes = /jpeg||png||jpg/;
-  let mimetype = filetypes.test(file.mimetype);
-  let extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  const filetypes = /jpeg|png|jpg/;
+  const mimetype = filetypes.test(file.mimetype);
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
   if (mimetype || extname) {
     return cb(null, true);
   }
-  cb("Error: File upload only supports the following filetypes -" + filetypes);
+  cb(
+    new Error(
+      "Error: File upload only supports the following filetypes - jpeg, png, jpg"
+    )
+  );
 };
 const fileUpload = multer({ storage: storage, fileFilter: fileFilterFn });
 module.exports = fileUpload;
