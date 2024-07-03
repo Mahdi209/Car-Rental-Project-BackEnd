@@ -1,7 +1,7 @@
 const user = require("../../models/user");
 const Location = require("../../models/location");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
 const getFirebaseImageUrl = require("../../config/firebaseStorageService");
 
