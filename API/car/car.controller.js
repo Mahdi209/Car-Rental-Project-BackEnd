@@ -23,7 +23,16 @@ const getCarsByCompany = async (req, res, next) => {
 
 const createCar = async (req, res, next) => {
   try {
-    const newCar = await Car.create({ ...req.body });
+    // console.log(req.body);
+    const carInfo = {
+      carCompany: req.body.company,
+      carName: req.body.carName,
+      carTypes: req.body.carTypes,
+      engine: req.body.engine,
+      seats: req.body.seats,
+      Gear: req.body.Gear,
+    };
+    const newCar = await Car.create(carInfo);
     res.json(newCar);
   } catch (error) {
     next(error);

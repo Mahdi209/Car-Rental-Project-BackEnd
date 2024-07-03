@@ -2,7 +2,10 @@ const reviews = require("../../models/reviews.js");
 
 const getReviews = async (req, res, next) => {
   try {
-    const review = await reviews.find().populate("user", "fullName profile");
+    const id = req.params.id;
+    const review = await reviews
+      .find({ company: id })
+      .populate("user", "fullName profile");
 
     res.json(review);
   } catch (error) {
@@ -10,29 +13,20 @@ const getReviews = async (req, res, next) => {
   }
 };
 
-const getCarReviews = async (req, res, next) => {
-  try {
-    const id = req.user.id;
-    const blogs = await reviews.find({ user: id }).populate("blog", "title");
-    res.json(blogs);
-  } catch (error) {
-    next(error);
-  }
-};
 const getCompanyReviews = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const blogComments = await reviews
-      .find({ blog: id })
+    const { id } = req.user;
+    const Comments = await reviews
+      .find({ company: id })
       .populate("user", "fullName profile");
 
-    if (!blogComments.length) {
+    if (!Comments.length) {
       return res
         .status(404)
         .json({ message: "No comments found for this blog" });
     }
 
-    res.status(200).json(blogComments);
+    res.status(200).json(Comments);
   } catch (error) {
     next(error);
   }
@@ -40,7 +34,12 @@ const getCompanyReviews = async (req, res, next) => {
 
 const createReviews = async (req, res, next) => {
   try {
-    const newReview = await reviews.create({ ...req.body, user: req.user.id });
+    const newComment = {
+      content: req.body.content,
+      user: req.user.id,
+      company: req.body.company,
+    };
+    const newReview = await reviews.create(newComment);
     res.json(newReview);
   } catch (error) {
     next(error);
@@ -74,7 +73,6 @@ const updateReviewsById = async (req, res, next) => {
 module.exports = {
   getReviews,
   getCompanyReviews,
-  getCarReviews,
   createReviews,
   deleteReviews,
   updateReviewsById,

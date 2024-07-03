@@ -7,12 +7,17 @@ const {
   deleteUser,
   getCompanyUsers,
   loginUser,
+  getCompanyDetails,
 } = require("./user.controller");
 const fileUpload = require("../../middlewares/fileUpload");
-const { authenticateUser } = require("../../middlewares/auth");
+const {
+  authenticateToken,
+  authenticateUser,
+} = require("../../middlewares/auth");
 
 //get method all chat
 userRouter.get("/", getAllUsers);
+userRouter.get("/Details/:id", getCompanyDetails);
 
 //get method for username
 userRouter.get("/company", getCompanyUsers);
@@ -23,8 +28,13 @@ userRouter.delete("/:id", deleteUser);
 //post method
 userRouter.post("/register", fileUpload.single("profile"), signUp);
 userRouter.post("/login", authenticateUser, loginUser);
+userRouter.put(
+  "/",
+  fileUpload.single("profile"),
+  authenticateToken,
+  updateUser
+);
 
 //put method
-userRouter.put("/:id", updateUser);
 
 module.exports = userRouter;

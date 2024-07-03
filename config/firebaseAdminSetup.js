@@ -1,11 +1,10 @@
-const admin = require("firebase-admin");
-const serviceAccountKey = require("./firebaseServiceKey.json");
+const { initializeApp, cert } = require("firebase-admin/app");
+const { getStorage } = require("firebase-admin/storage");
+const serviceAccountKey = require("./firebaseServiceKey");
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccountKey),
-  storageBucket: "car-rental-789b0.appspot.com",
+exports.app = initializeApp({
+  credential: cert(serviceAccountKey),
+  storageBucket: `gs://car-rental-789b0.appspot.com`,
 });
 
-exports.db = admin.firestore();
-
-exports.bucket = admin.storage().bucket();
+exports.bucket = getStorage().bucket();

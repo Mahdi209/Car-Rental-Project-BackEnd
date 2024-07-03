@@ -3,15 +3,13 @@ const reviewsRouter = express.Router();
 const {
   getReviews,
   getCompanyReviews,
-  getCarReviews,
   createReviews,
   deleteReviews,
   updateReviewsById,
 } = require("./reviews.controller");
 const { authenticateToken } = require("../../middlewares/auth");
 
-reviewsRouter.get("/", getReviews);
-reviewsRouter.get("/commentForCar/:id", getCarReviews);
+reviewsRouter.get("/companyReviews/:id", getReviews);
 
 reviewsRouter.get("/CompanyComment/", authenticateToken, getCompanyReviews);
 

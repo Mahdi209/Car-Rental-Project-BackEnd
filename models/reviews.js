@@ -6,19 +6,13 @@ const ReviewSchema = new Schema({
     type: String,
     required: true,
   },
-  like: {
-    type: Number,
-  },
   user: {
     type: Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
-  Car: {
-    type: Schema.Types.ObjectId,
-    ref: "Car",
-  },
-  Company: {
+
+  company: {
     type: Schema.Types.ObjectId,
     ref: "User",
   },

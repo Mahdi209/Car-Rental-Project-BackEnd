@@ -17,6 +17,10 @@ const userSchema = new Schema({
     unique: true,
     match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   },
+  phone: {
+    type: String,
+    required: true,
+  },
   password: {
     type: String,
     required: true,
@@ -32,6 +36,11 @@ const userSchema = new Schema({
   role: {
     type: Schema.Types.ObjectId,
     ref: "Role",
+    required: true,
+  },
+  city: {
+    type: Schema.Types.ObjectId,
+    ref: "City",
     required: true,
   },
 });

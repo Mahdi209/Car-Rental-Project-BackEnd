@@ -16,6 +16,8 @@ const carTypeRouter = require("./API/carType/carType.router");
 const carRouter = require("./API/car/car.router");
 const locationRouter = require("./API/location/location.router");
 const carDetailsRouter = require("./API/carDetails/carDetails.router");
+const phoneRouter = require("./API/PhoneCode/phone");
+const cityRouter = require("./API/city/city.router");
 connectDB();
 app.use(cors());
 
@@ -31,6 +33,8 @@ app.use("/carType", carTypeRouter);
 app.use("/car", carRouter);
 app.use("/location", locationRouter);
 app.use("/carDetails", carDetailsRouter);
+app.use("/phone", phoneRouter);
+app.use("/city", cityRouter);
 
 // Page not found
 app.use(notFound);

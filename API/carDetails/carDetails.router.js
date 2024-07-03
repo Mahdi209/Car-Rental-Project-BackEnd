@@ -7,13 +7,16 @@ const {
   getSingleCar,
   deleteCarDetails,
   updateCarDetails,
+  getCompanyCar,
 } = require("./carDetails.controller");
 const { authenticateToken } = require("../../middlewares/auth");
 const fileUpload = require("../../middlewares/fileUpload");
 
+carDetailsRouter.get("/myCar", authenticateToken, getCarsByCompany);
 carDetailsRouter.get("/", getCar);
+carDetailsRouter.get("/company/:id", getCompanyCar);
+
 carDetailsRouter.get("/:id", getSingleCar);
-carDetailsRouter.get("/CompanyCar/:id", getCarsByCompany);
 
 carDetailsRouter.post(
   "/",
@@ -21,7 +24,7 @@ carDetailsRouter.post(
   fileUpload.single("image"),
   createCar
 );
-carDetailsRouter.delete("/:id", deleteCarDetails);
-carDetailsRouter.put("/", authenticateToken, updateCarDetails);
+carDetailsRouter.delete("/:id", authenticateToken, deleteCarDetails);
+carDetailsRouter.put("/:id", authenticateToken, updateCarDetails);
 
 module.exports = carDetailsRouter;
