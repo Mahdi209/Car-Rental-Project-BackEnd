@@ -6,9 +6,7 @@ const { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require("@aw
 const s3Client = require("../config/aws-s3");
 const fs = require('fs').promises;
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-
-
-
+const getFirebaseImageUrl = require("../config/storage");
 
 
 const generateToken = (userCredentials) => {
@@ -20,7 +18,7 @@ const generateToken = (userCredentials) => {
     email: userCredentials.email,
     fullName: userCredentials.fullName,
     role: userCredentials.role,
-    profile: userCredentials.url,
+    profile: userCredentials.profile,
     city: userCredentials.city,
     phone: userCredentials.phone,
   };
@@ -54,16 +52,6 @@ const getCompanyUsers = async (req, res, next) => {
     if (!userData || userData.length === 0)
       return res.status(404).send("Users not found.");
 
-    for (const user of userData) {
-
-      const command = new GetObjectCommand({
-        Bucket: process.env.BUCKET_NAME,
-        Key: user.profile,
-      });
-      const url = await getSignedUrl(s3Client, command, { expiresIn: 5 * 24 * 60 * 60 });
-      user.profile = url
-    }
-
     res.json(userData);
   } catch (error) {
     next(error);
@@ -80,12 +68,6 @@ const getCompanyDetails = async (req, res, next) => {
 
     const loc = await Location.find({ user: id });
 
-    const command = new GetObjectCommand({
-      Bucket: process.env.BUCKET_NAME,
-      Key: userData.profile,
-    });
-    const url = await getSignedUrl(s3Client, command, { expiresIn: 5 * 24 * 60 * 60 });
-    userData.profile = url
     if (!userData || userData.length === 0)
       return res.status(404).send("Users not found.");
     const userDetails = {
@@ -104,15 +86,7 @@ const loginUser = async (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ message: 'Authentication failed' });
     }
-
-
-    const command = new GetObjectCommand({
-      Bucket: process.env.BUCKET_NAME,
-      Key: req.user.profile,
-    });
-    const url = await getSignedUrl(s3Client, command, { expiresIn: 5 * 24 * 60 * 60 });
-
-    const token = generateToken({ ...req.user.toObject(), url });
+    const token = generateToken(req.user);
     return res.status(200).json({ token });
   } catch (error) {
     next(error);
@@ -125,31 +99,14 @@ const signUp = async (req, res, next) => {
     if (!username || !email || !password) {
       return res.status(400).json({ message: "Username, email, and password are required" });
     }
-
     if (!req.file) {
       return res.status(400).json({ message: "Profile picture is required" });
     }
-
-    const fileContent = await fs.readFile(req.file.path);
-    const imageName = `profile/${req.file.filename}`;
-
-    const params = {
-      Bucket: process.env.BUCKET_NAME,
-      Key: imageName,
-      Body: fileContent,
-      ContentType: req.file.mimetype,
-    };
-
-    try {
-      const command = new PutObjectCommand(params);
-      await s3Client.send(command);
-      await fs.unlink(req.file.path);
-    } catch (uploadError) {
-      await fs.unlink(req.file.path);
-      return res
-        .status(500)
-        .json({ message: "Error uploading profile picture", error: uploadError.message });
-    }
+    const imageUrl = await getFirebaseImageUrl(
+      "user-profile",
+      req.file.path,
+      req.file.filename
+    );
 
     const saltRound = 10;
     const hashPassword = await bcrypt.hash(password, saltRound);
@@ -157,20 +114,11 @@ const signUp = async (req, res, next) => {
     const newUserData = {
       ...req.body,
       password: hashPassword,
-      profile: imageName,
+      profile: imageUrl,
     };
 
     const newUser = await user.create(newUserData);
-    const getObjectParams = {
-      Bucket: process.env.BUCKET_NAME,
-      Key: imageName,
-    }
-
-    const command = new GetObjectCommand(getObjectParams);
-    const url = await getSignedUrl(s3Client, command, { expiresIn: 5 * 24 * 60 * 60 });
-
-    const token = generateToken({ ...newUser.toObject(), url });
-
+    const token = generateToken(newUser);
     res.status(201).json({ token });
   } catch (error) {
     next(error);

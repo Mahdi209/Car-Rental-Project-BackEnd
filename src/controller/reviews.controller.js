@@ -77,7 +77,6 @@ const createReviews = async (req, res, next) => {
       company: req.body.company,
       star: req.body.rating,
     };
-    console.log(newComment)
     const newReview = await reviews.create(newComment);
     res.json(newReview);
   } catch (error) {

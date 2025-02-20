@@ -4,6 +4,7 @@
         "appspot",
         "carrentaliq",
         "CUIWRQTDFXM",
-        "firestore"
+        "firestore",
+        "presigner"
     ]
 }
