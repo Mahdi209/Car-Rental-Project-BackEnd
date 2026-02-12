@@ -1,17 +1,16 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const role = require('./role.router');
-const userRouter = require('./user.router');
-const reviewsRouter = require('./reviews.router');
-const carCompanyRouter = require('./carCompany.router');
-const carTypeRouter = require('./carType.router');
-const carRouter = require('./car.router');
-const locationRouter = require('./location.router');
-const carDetailsRouter = require('./carDetails.router');
-const phoneRouter = require('../controller/phone');
-const cityRouter = require('./city.router');
-
+const role = require("./role.router");
+const userRouter = require("./user.router");
+const reviewsRouter = require("./reviews.router");
+const carCompanyRouter = require("./carCompany.router");
+const carTypeRouter = require("./carType.router");
+const carRouter = require("./car.router");
+const locationRouter = require("./location.router");
+const carDetailsRouter = require("./carDetails.router");
+const phoneRouter = require("../controller/phone");
+const cityRouter = require("./city.router");
 
 router.use("/role", role);
 router.use("/users", userRouter);

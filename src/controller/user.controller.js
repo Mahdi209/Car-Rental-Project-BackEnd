@@ -2,16 +2,17 @@ const user = require("../models/user");
 const Location = require("../models/location");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
+const {
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+} = require("@aws-sdk/client-s3");
 const s3Client = require("../config/aws-s3");
-const fs = require('fs').promises;
+const fs = require("fs").promises;
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const getFirebaseImageUrl = require("../config/storage");
 
-
 const generateToken = (userCredentials) => {
-
-
   const payload = {
     id: userCredentials._id,
     username: userCredentials.username,
@@ -84,7 +85,7 @@ const getCompanyDetails = async (req, res, next) => {
 const loginUser = async (req, res, next) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ message: 'Authentication failed' });
+      return res.status(401).json({ message: "Authentication failed" });
     }
     const token = generateToken(req.user);
     return res.status(200).json({ token });
@@ -97,16 +98,18 @@ const signUp = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
-      return res.status(400).json({ message: "Username, email, and password are required" });
+      return res
+        .status(400)
+        .json({ message: "Username, email, and password are required" });
     }
     if (!req.file) {
       return res.status(400).json({ message: "Profile picture is required" });
     }
-    const imageUrl = await getFirebaseImageUrl(
-      "user-profile",
-      req.file.path,
-      req.file.filename
-    );
+    // const imageUrl = await getFirebaseImageUrl(
+    //   "user-profile",
+    //   req.file.path,
+    //   req.file.filename
+    // );
 
     const saltRound = 10;
     const hashPassword = await bcrypt.hash(password, saltRound);
@@ -114,7 +117,7 @@ const signUp = async (req, res, next) => {
     const newUserData = {
       ...req.body,
       password: hashPassword,
-      profile: imageUrl,
+      profile: req.file.path.split("public")[1],
     };
 
     const newUser = await user.create(newUserData);
@@ -137,12 +140,14 @@ const updateUser = async (req, res, next) => {
     if (req.file) {
       if (req.user.profile) {
         try {
-          await s3Client.send(new DeleteObjectCommand({
-            Bucket: process.env.BUCKET_NAME,
-            Key: req.user.profile
-          }));
+          await s3Client.send(
+            new DeleteObjectCommand({
+              Bucket: process.env.BUCKET_NAME,
+              Key: req.user.profile,
+            }),
+          );
         } catch (error) {
-          console.error('Error deleting old profile:', error);
+          console.error("Error deleting old profile:", error);
         }
       }
 
@@ -163,25 +168,26 @@ const updateUser = async (req, res, next) => {
         Bucket: process.env.BUCKET_NAME,
         Key: imageName,
       });
-      profileUrl = await getSignedUrl(s3Client, command, { expiresIn: 5 * 24 * 60 * 60 });
+      profileUrl = await getSignedUrl(s3Client, command, {
+        expiresIn: 5 * 24 * 60 * 60,
+      });
       updates.profile = imageName;
     }
 
-    const updatedUser = await user.findByIdAndUpdate(
-      id,
-      updates,
-      {
-        new: true,
-        runValidators: true,
-        select: '-password -__v'
-      }
-    );
+    const updatedUser = await user.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true,
+      select: "-password -__v",
+    });
 
     if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    const newToken = generateToken({ ...updatedUser.toObject(), url: profileUrl || req.user.profile });
+    const newToken = generateToken({
+      ...updatedUser.toObject(),
+      url: profileUrl || req.user.profile,
+    });
     return res.json({ token: newToken });
   } catch (error) {
     next(error);

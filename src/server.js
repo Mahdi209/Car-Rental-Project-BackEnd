@@ -10,7 +10,6 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("./config/swagger.json");
 const PORT = process.env.PORT;
 
-
 // Connect to the database
 connectDB();
 
@@ -27,9 +26,9 @@ app.use("/images", express.static(staticPath));
 // Define your routes
 const notFound = require("./middlewares/notFoundPage");
 const errorHandle = require("./middlewares/handleError");
-const router = require("./router/index")
+const router = require("./router/index");
 
-app.use("/api", router)
+app.use("/api", router);
 
 // Page not found
 app.use(notFound);

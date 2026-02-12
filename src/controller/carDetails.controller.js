@@ -1,9 +1,6 @@
 const CarDetails = require("../models/CarDetails");
 const mongoose = require("mongoose");
-const fs = require('fs').promises;
-const s3Client = require("../config/aws-s3");
-const { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const fs = require("fs").promises;
 
 const getCar = async (req, res, next) => {
   try {
@@ -24,18 +21,7 @@ const getCar = async (req, res, next) => {
       })
       .populate("company", "fullName city")
       .select("-color   -pricePerWeek");
-    for (let car of cars) {
-      const signedUrls = await Promise.all(
-        car.images.map(async (imageKey) => {
-          const command = new GetObjectCommand({
-            Bucket: process.env.BUCKET_NAME,
-            Key: imageKey,
-          });
-          return getSignedUrl(s3Client, command, { expiresIn: 5 * 24 * 60 * 60 });
-        })
-      );
-      car.images = signedUrls;
-    }
+
     res.json(cars);
   } catch (error) {
     next(error);
@@ -61,19 +47,6 @@ const getSingleCar = async (req, res, next) => {
         ],
       })
       .populate("company", "fullName phone");
-
-    for (let car of cars) {
-      const signedUrls = await Promise.all(
-        car.images.map(async (imageKey) => {
-          const command = new GetObjectCommand({
-            Bucket: process.env.BUCKET_NAME,
-            Key: imageKey,
-          });
-          return getSignedUrl(s3Client, command, { expiresIn: 5 * 24 * 60 * 60 });
-        })
-      );
-      car.images = signedUrls;
-    }
 
     res.json(cars);
   } catch (error) {
@@ -126,19 +99,6 @@ const getCompanyCar = async (req, res, next) => {
       })
       .populate("company", "fullName");
 
-    for (let car of caCompany) {
-      const signedUrls = await Promise.all(
-        car.images.map(async (imageKey) => {
-          const command = new GetObjectCommand({
-            Bucket: process.env.BUCKET_NAME,
-            Key: imageKey,
-          });
-          return getSignedUrl(s3Client, command, { expiresIn: 5 * 24 * 60 * 60 });
-        })
-      );
-      car.images = signedUrls;
-    }
-
     res.json(caCompany);
   } catch (error) {
     next(error);
@@ -154,35 +114,8 @@ const createCar = async (req, res, next) => {
 
     // Process all 4 images
     for (const file of req.files) {
-      const fileContent = await fs.readFile(file.path);
-      const imageName = `car/${file.filename}`;
-      const params = {
-        Bucket: process.env.BUCKET_NAME,
-        Key: imageName,
-        Body: fileContent,
-        ContentType: file.mimetype,
-      };
-
-      try {
-        const command = new PutObjectCommand(params);
-        await s3Client.send(command);
-        await fs.unlink(file.path);
-        imageNames.push(imageName);
-      } catch (uploadError) {
-        // Clean up the current file
-        await fs.unlink(file.path);
-        // Clean up any previously uploaded files from S3 for this request
-        for (const uploadedImage of imageNames) {
-          const deleteParams = {
-            Bucket: process.env.BUCKET_NAME,
-            Key: uploadedImage
-          };
-          await s3Client.send(new DeleteObjectCommand(deleteParams));
-        }
-        return res
-          .status(500)
-          .json({ message: "Error uploading images", error: uploadError.message });
-      }
+      const imageName = file.path.split("public")[1].replace(/\\/g, "/");
+      imageNames.push(imageName);
     }
 
     const newData = {
@@ -193,13 +126,13 @@ const createCar = async (req, res, next) => {
       status: true,
       pricePerDay: req.body.pricePerDay,
       pricePerWeek: req.body.pricePerWeek,
-      images: imageNames
+      images: imageNames,
     };
 
     const newCar = await CarDetails.create(newData);
     res.json({
       message: "Car created successfully",
-      car: newCar
+      car: newCar,
     });
   } catch (error) {
     next(error);
