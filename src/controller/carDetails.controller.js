@@ -112,7 +112,6 @@ const createCar = async (req, res, next) => {
 
     const imageNames = [];
 
-    // Process all 4 images
     for (const file of req.files) {
       const imageName = file.path.split("public")[1].replace(/\\/g, "/");
       imageNames.push(imageName);
