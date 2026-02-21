@@ -43,7 +43,7 @@ const getAllUsers = async (req, res, next) => {
 
 const getCompanyUsers = async (req, res, next) => {
   try {
-    const roleId = "665dd36e320441f73c286794";
+    const roleId = "698de860ee12775b0e7fb729";
 
     const userData = await user
       .find({ role: roleId })
